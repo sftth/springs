@@ -1,0 +1,12 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%-- RSA --%>
+<script type="text/javascript" src="/js/crypto/jsbn/core/jsbn.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/core/jsbn2.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/util/prng4.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/util/rng.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/rsa/rsa.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/rsa/rsa2.js"></script>
+<script type="text/javascript" src="/js/crypto/jsbn/util/base64.js"></script>
+
+<script type="text/javascript" src="/js/crypto/crypto.js"></script>

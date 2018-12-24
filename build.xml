@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="build_all" name="springs">
+	<property name="project_name" value="springs"/>
+	<property name="artifactId" value="mainWebApp"/>
+	<property name="target.dir" value="${basedir}/target/${artifactId}"/>
+	<property name="web.tar.directory" value="${basedir}/build/web" />
+	<property name="was.tar.directory" value="${basedir}/build/was" />
+	
+	<!-- 1. Web Packaging -->
+	<target name="web.tar">
+		<delete dir="${web.tar.directory}" />
+		<mkdir dir="${web.tar.directory}" />
+		<tar destfile="${web.tar.directory}/${artifactId}.tar" longfile="gnu">
+			<tarfileset dir="${target.dir}" preserveLeadingSlashes="true">
+				<include name="**/*.js" />
+				<include name="**/*.css"/>
+				<exclude name="WEB-INF/**" />
+			</tarfileset>	
+		</tar>
+	</target>
+	<!--2. Was Packaging -->
+	<target name="was.war">
+		<delete dir="${was.tar.directory}" />
+		<mkdir dir="${was.tar.directory}" />
+		<war destfile="${was.tar.directory}/${artifactId}.war">
+			<fileset dir="${target.dir}">
+				<include name="WEB-INF/**" />
+				<include name="**/*.jspf"/>
+			</fileset>	
+		</war>
+	</target>
+	<target name="build_all">
+		<antcall target="web.tar" />
+		<antcall target="was.war" />
+	</target>
+</project>

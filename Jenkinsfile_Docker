@@ -1,0 +1,33 @@
+pipeline {
+	agent any
+	
+	parameters {
+		string(name: 'docker_server' , defaultValue: '54.180.140.146' , description: 'Docker Server')
+	}
+	
+	triggers {
+		pollSCM('* * * * *')
+	}
+	
+	stages {
+		stage('Build') {
+			steps {
+				echo '========================1. Maven Build ====================='
+				
+				sh 'mvn clean package'
+			}
+			post {
+				success {
+					echo '========================2.Archiving ==================='
+					archiveArtifacts artifacts: '**/target/*.war'
+				}
+			}
+		}
+		stage('Deploy to DockerServer'){
+			steps {
+				echo '==========================3.Code Deploy===================='
+				sh "scp -i /home/ec2-user/sftth320-keypair.cer -o StrictHostKeyChecking=no ./target/*.war ec2-user@${params.docker_server}:/sorc001/applications"
+			}
+		}
+	}
+}

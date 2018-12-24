@@ -1,0 +1,69 @@
+pipeline {
+	agent any
+	
+	parameters {
+		string(name: 'apache_dev' , defaultValue: '192.168.1.30' , description: 'Staging WEB Server')
+		string(name: 'tomcat_dev' , defaultValue: '192.168.1.30' , description: 'Staging WAS Server')
+		string(name: 'apache_prod', defaultValue: '192.168.1.28' , description: 'Production WEB Server')
+		string(name: 'tomcat_prod', defaultValue: '192.168.1.184', description: 'Production WAS Server')
+	}
+	
+	triggers {
+		pollSCM('* * * * *')
+	}
+	
+	stages {
+		stage('Build') {
+			steps {
+				echo '========================1. Maven Build ====================='
+				
+				sh 'mvn clean package'
+			}
+		}
+		
+		stage('Packaging') {
+			steps {
+				echo '=========================3.Ant Package======================'
+				sh '/sorc001/ant/bin/ant web.tar was.war'
+			}
+		}
+		stage('Dev Deployments'){
+			parallel{
+				stage('Deploy to Dev WAS') {
+					steps {
+						echo '===========================4.Deploy Dev WAS================='
+						sh "scp -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev}:/sorc001/applications/dev_8180"
+					}
+				}
+				stage('Deploy to Dev WEB'){
+					steps{
+						echo '====================5.Deploy WEB========================='
+						sh "ssh -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/applications/htdocs/*"
+						sh "scp -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/applications/htdocs"
+						sh "ssh -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/applications/htdocs/mainWebApp.tar -C /sorc001/applications/htdocs"
+					}
+				}
+			}		
+		
+		}
+		stage('Prod Deployments'){
+			parallel{
+				stage('Deploy to Prod WAS') {
+					steps {
+						echo '====================4.Deploy 8180========================='
+						sh "scp -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_prod}:/sorc001/applications/ist_8180"
+						sh "scp -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_prod}:/sorc001/applications/ist_8190"
+					}
+				}
+				stage('Deploy to Prod WEB') {
+					steps {
+						echo '====================5.Deploy WEB========================='
+						sh "ssh -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_prod} rm -rf /sorc001/applications/htdocs/*"
+						sh "scp -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_prod}:/sorc001/applications/htdocs"
+						sh "ssh -i /home/ec2-user/sftth319-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_prod} tar -xvf /sorc001/applications/htdocs/mainWebApp.tar -C /sorc001/applications/htdocs"
+					}
+				}
+			}
+		}
+	}
+}

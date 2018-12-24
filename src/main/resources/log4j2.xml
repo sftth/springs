@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="5" status="debug" packages="" strict="true">
+	<Appenders>
+		<!-- Console 출력 -->
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="sensing" level="debug">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="dailyRollingFileAppender" />
+		</Logger>
+		<Root level="INFO">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="dailyRollingFileAppender" />
+		</Root>
+	</Loggers>
+</Configuration>
