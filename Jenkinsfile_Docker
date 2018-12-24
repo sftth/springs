@@ -2,7 +2,7 @@ pipeline {
 	agent any
 	
 	parameters {
-		string(name: 'docker_server' , defaultValue: '54.180.140.146' , description: 'Docker Server')
+		string(name: 'docker_server' , defaultValue: '13.125.233.18' , description: 'Docker Server')
 	}
 	
 	triggers {
