@@ -11,7 +11,7 @@ pipeline {
 				echo '========================1. Maven Build ====================='
 				
 				sh 'mvn clean package'
-				sh "docker build . -t myserver:${env.BUILD_ID} ./"
+				sh "docker build -t myserver:${env.BUILD_ID} ./"
 			}
 		}
 	}
