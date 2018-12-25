@@ -5,13 +5,29 @@ pipeline {
 		string(name: 'docker_server' , defaultValue: '13.125.233.18' , description: 'Docker Server')
 	}
 	
+	triggers {
+		pollSCM('* * * * *')
+	}
+	
 	stages {
-		stage('Build') {
+		stage('Maven Build') {
 			steps {
 				echo '========================1. Maven Build ====================='
-				
 				sh 'mvn clean package'
+			}
+		}
+		stage('Docker Build') {
+			steps {
+				echo '========================2. Docker Build ===================='
 				sh "docker build -t myserver:${env.BUILD_ID} ./"
+			}
+		}
+		stage('Docker Push') {
+			steps {
+				echo '========================3. Docker Push ====================='
+				sh 'docker tag myserver:${env.BUILD_ID} sftth/mytomcat8:${env.BUILD_ID}'
+				sh 'docker login'
+				sh 'docker push sftth/mytomcat8:${env.BUILD_ID}'
 			}
 		}
 	}
