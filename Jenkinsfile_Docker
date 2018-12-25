@@ -25,9 +25,9 @@ pipeline {
 		stage('Docker Push') {
 			steps {
 				echo '========================3. Docker Push ====================='
-				sh 'docker tag myserver:${env.BUILD_ID} sftth/mytomcat8:${env.BUILD_ID}'
-				sh 'docker login'
-				sh 'docker push sftth/mytomcat8:${env.BUILD_ID}'
+				sh "docker tag myserver:${env.BUILD_ID} sftth/mytomcat8:${env.BUILD_ID}"
+				sh "docker login"
+				sh "docker push sftth/mytomcat8:${env.BUILD_ID}"
 			}
 		}
 	}
