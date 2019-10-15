@@ -28,6 +28,7 @@ public class MainController {
 	
 	@RequestMapping("/param/{id}")
 	public ModelAndView main(@PathVariable("id")int id) {
+		System.out.println("tesr");
 		return new ModelAndView("param").addObject("id",id);
 	}
 	
