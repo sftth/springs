@@ -11,7 +11,7 @@
 		<delete dir="${web.tar.directory}" />
 		<mkdir dir="${web.tar.directory}" />
 		<tar destfile="${web.tar.directory}/${artifactId}.tar" longfile="gnu">
-			<tarfileset dir="${target.dir}" preserveLeadingSlashes="true">
+			<tarfileset dir="${target.dir}">
 				<include name="**/*.js" />
 				<include name="**/*.css"/>
 				<exclude name="WEB-INF/**" />
