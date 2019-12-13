@@ -1,0 +1,50 @@
+pipeline {
+	agent any
+	
+	parameters {
+		string(name: 'apache_dev' , defaultValue: '172.31.10.39' , description: 'Dev WEB Server')
+		string(name: 'tomcat_dev' , defaultValue: '172.31.10.39' , description: 'Dev WAS Server')
+		string(name: 'apache_prod', defaultValue: '192.168.1.28' , description: 'Production WEB Server')
+		string(name: 'tomcat_prod', defaultValue: '192.168.1.184', description: 'Production WAS Server')
+	}
+	
+	triggers {
+		pollSCM('* * * * *')
+	}
+	
+	stages {
+		stage('Build') {
+			steps {
+				echo '========================1. Maven Build ====================='
+				
+				sh 'mvn clean package'
+			}
+		}
+		
+		stage('Packaging') {
+			steps {
+				echo '=========================3.Ant Package======================'
+				sh '/sorc001/ant/bin/ant web.tar was.war'
+			}
+		}
+		stage('Dev Deployments'){
+			parallel{
+				stage('Deploy to Dev WAS') {
+					steps {
+						echo '===========================4.Deploy Dev WAS================='
+						sh "scp -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev}:/sorc001/appadm/application"
+					}
+				}
+				stage('Deploy to Dev WEB'){
+					steps{
+						echo '====================5.Deploy WEB========================='
+						sh "ssh  -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/appadm/application/htdocs/*"
+						sh "scp  -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/appadm/application/htdocs"
+						sh "ssh  -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
+					}
+				}
+			}		
+		
+		}
+	}
+}
