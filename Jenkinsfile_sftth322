@@ -31,15 +31,15 @@ pipeline {
 				stage('Deploy to Dev WAS') {
 					steps {
 						echo '===========================4.Deploy Dev WAS================='
-						sh "scp -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev}:/sorc001/appadm/application"
+						sh "scp -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev}:/sorc001/appadm/application"
 					}
 				}
 				stage('Deploy to Dev WEB'){
 					steps{
 						echo '====================5.Deploy WEB========================='
-						sh "ssh  -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/appadm/application/htdocs/*"
-						sh "scp  -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/appadm/application/htdocs"
-						sh "ssh  -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
+						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/appadm/application/htdocs/*"
+						sh "scp  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/appadm/application/htdocs"
+						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
 					}
 				}
 			}		
