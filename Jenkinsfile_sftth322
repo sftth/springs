@@ -12,17 +12,11 @@ pipeline {
 		pollSCM('* * * * *')
 	}
 
-	def mvnHome
-
 	stages {
-	    stage('Preparation') {
-	        echo 'Current workspace: ${workspace}'
-	        mvnHome = tool 'MVN'
-	    }
 		stage('Build') {
 			steps {
 				echo '========================1. Maven Build ====================='
-				
+	            mvnHome = tool 'MVN'
 				sh '${mvnHome}/bin/mvn clean package'
 			}
 		}
