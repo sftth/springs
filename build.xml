@@ -26,6 +26,7 @@
 			<fileset dir="${target.dir}">
 				<include name="WEB-INF/**" />
 				<include name="**/*.jspf"/>
+				<include name="**/*.jsp" />
 			</fileset>	
 		</war>
 	</target>
