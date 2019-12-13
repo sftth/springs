@@ -16,15 +16,14 @@ pipeline {
 		stage('Build') {
 			steps {
 				echo '========================1. Maven Build ====================='
-	            mvnHome = tool 'MVN'
-				sh '${mvnHome}/bin/mvn clean package'
+				sh '/sorc001/appadm/ciserv/maven/bin/mvn clean package'
 			}
 		}
 		
 		stage('Packaging') {
 			steps {
 				echo '=========================3.Ant Package======================'
-				sh '/sorc001/ant/bin/ant web.tar was.war'
+				sh '/sorc001/appadm/ciserv/ant/bin/ant web.tar was.war'
 			}
 		}
 		stage('Dev Deployments'){
