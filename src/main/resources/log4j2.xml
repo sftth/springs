@@ -10,11 +10,10 @@
 	<Loggers>
 		<Logger name="sensing" level="debug">
 			<AppenderRef ref="console" />
-			<AppenderRef ref="dailyRollingFileAppender" />
+
 		</Logger>
 		<Root level="INFO">
 			<AppenderRef ref="console" />
-			<AppenderRef ref="dailyRollingFileAppender" />
 		</Root>
 	</Loggers>
 </Configuration>

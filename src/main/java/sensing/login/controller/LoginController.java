@@ -79,7 +79,7 @@ public class LoginController {
 		if(password != null) {
 			responseModel.setSuccess("Y");
 			loginModel.setPassword(password);
-			loginServie.insertUser(loginModel);
+			// loginServie.insertUser(loginModel);
 		} else {
 			responseModel.setSuccess("N");
 			responseModel.setTrMsg("Error Password is null.");
