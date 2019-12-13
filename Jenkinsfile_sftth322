@@ -42,7 +42,6 @@ pipeline {
 				}
 				stage('Restart WEB'){
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/apache/2.4/servers/webd-ist_80/restart.sh"
-"
 				}
 				stage('Restart WAS'){
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/tomcat/9.0/servers/ist_8180/restart.sh"
