@@ -17,7 +17,7 @@ pipeline {
 			steps {
 				echo '========================1. Maven Build ====================='
 				
-				sh 'mvn clean package'
+				sh '${mvnHome}/bin/mvn clean package'
 			}
 		}
 		
