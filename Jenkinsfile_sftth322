@@ -4,8 +4,6 @@ pipeline {
 	parameters {
 		string(name: 'apache_dev' , defaultValue: '172.31.10.39' , description: 'Dev WEB Server')
 		string(name: 'tomcat_dev' , defaultValue: '172.31.10.39' , description: 'Dev WAS Server')
-		string(name: 'apache_prod', defaultValue: '192.168.1.28' , description: 'Production WEB Server')
-		string(name: 'tomcat_prod', defaultValue: '192.168.1.184', description: 'Production WAS Server')
 	}
 	
 	triggers {
@@ -26,21 +24,28 @@ pipeline {
 				sh '/sorc001/appadm/ciserv/ant/bin/ant web.tar was.war'
 			}
 		}
-		stage('Dev Deployments'){
+		stage('Deploy'){
 			parallel{
-				stage('Deploy to Dev WAS') {
+				stage('Deploy WAS') {
 					steps {
 						echo '===========================4.Deploy Dev WAS================='
 						sh "scp -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev}:/sorc001/appadm/application"
 					}
 				}
-				stage('Deploy to Dev WEB'){
+				stage('Deploy WEB'){
 					steps{
 						echo '====================5.Deploy WEB========================='
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/appadm/application/htdocs/*"
 						sh "scp  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/appadm/application/htdocs"
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
 					}
+				}
+				stage('Restart WEB'){
+						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/apache/2.4/servers/webd-ist_80/restart.sh"
+"
+				}
+				stage('Restart WAS'){
+						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/tomcat/9.0/servers/ist_8180/restart.sh"
 				}
 			}		
 		
