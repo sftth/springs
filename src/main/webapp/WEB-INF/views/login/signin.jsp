@@ -174,6 +174,8 @@
     function success(jsonData) {
         if(jsonData.success == 'Y') {
             location.href = "/web/body";
+        } else {
+            alert(jsonData.trMsg);
         }
     }
 </script>

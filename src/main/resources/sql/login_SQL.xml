@@ -6,4 +6,9 @@
 			insert into users(email,password,name,grade)values(#{email},#{password},#{name},#{grade})
 		]]>
 	</insert>
+	<select id="selectUser" parameterType="String" resultType="sensing.cmmn.model.LoginModel">
+		<![CDATA[
+		select * from users	where email = #{value}
+		]]>
+	</select>
 </mapper>

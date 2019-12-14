@@ -4,4 +4,6 @@ import sensing.cmmn.model.LoginModel;
 
 public interface UserDao {
 	public void insertUser(LoginModel loginModel);
+
+    public LoginModel selectUser(String email);
 }

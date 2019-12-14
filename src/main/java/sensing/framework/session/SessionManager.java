@@ -1,48 +1,109 @@
 package sensing.framework.session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 public class SessionManager {
-	/**
-	 * HttpSession ∞¥√ºø°º≠ ø‰√ªµ» º”º∫∞™¿ª √ﬂ√‚
-	 * @param session HttpSession ∞¥√º
-	 * @param attributeName ø‰√ª º”º∫∏Ì
-	 * @return HttpSession¿∏∑Œ∫Œ≈Õ √ﬂ√‚µ» º”º∫∞™
-	 */
-	public static Object getAttribute(HttpSession session, String attributeName) {
-		return getAttributePrivate(session, attributeName);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SessionManager.class);
+
+    /**
+     * HttpSession Í∞ùÏ≤¥ÏóêÏÑú ÏöîÏ≤≠Îêú ÏÜçÏÑ±Í∞íÏùÑ Ï∂îÏ∂ú
+     * @param session HttpSession Í∞ùÏ≤¥
+     * @param attributeName ÏöîÏ≤≠ ÏÜçÏÑ±Î™Ö
+     * @return HttpSessionÏúºÎ°úÎ∂ÄÌÑ∞ Ï∂îÏ∂úÎêú ÏÜçÏÑ±Í∞í
+     */
+    public static Object getAttribute(HttpSession session, String attributeName) {
+        return getAttributePrivate(session, attributeName);
+    }
+
+    public static Object getAttribute(HttpServletRequest request, String attributeName) {
+        return getAttributePrivate(request, attributeName);
+    }
+
+    public static Object getAttributePrivate(HttpServletRequest request, String attributeName) {
+        Object result = null;
+        if(request != null) {
+            HttpSession session = request.getSession(false);
+            result = SessionManager.getAttribute(session, attributeName);
+        }
+        return result;
+    }
+
+    private static Object getAttributePrivate(HttpSession session, String attributeName) {
+        Object result = null;
+        if(session != null && attributeName != null) {
+            result = session.getAttribute(attributeName);
+        }
+
+        return result;
+    }
+
+    public static void setAttribute(HttpSession session, String attributeName, Object value) {
+        setAttributePrivate(session, attributeName, value);
+    }
+
+    public static void setAttributePrivate(HttpSession session, String attributeName, Object value) {
+        if(session != null && attributeName != null) {
+            session.setAttribute(attributeName, value);
+        }
+    }
+
+	public static void setNewSessionData(HttpServletRequest request, SessionModel model) throws Exception {
+		LOGGER.debug("setNewSessionData is Started");
+		HttpSession session = request.getSession(false);
+		session = getNewSession(request);
+		session.setAttribute(SessionModel.SESSION_NAME, model);
+		LOGGER.debug("setNewSessionData is Finished.");
 	}
-	
-	public static Object getAttribute(HttpServletRequest request, String attributeName) {
-		return getAttributePrivate(request, attributeName);
+
+	private static HttpSession getNewSession(HttpServletRequest request) throws Exception {
+		LOGGER.debug("getNewSession is Started.");
+		int session_timeout = 60 * 60 ;
+		request.getSession(true).setMaxInactiveInterval(session_timeout);
+
+		return request.getSession(true);
 	}
-	
-	public static Object getAttributePrivate(HttpServletRequest request, String attributeName) {
-		Object result = null;
-		if(request != null) {
-			HttpSession session = request.getSession(false);
-			result = SessionManager.getAttribute(session, attributeName);
+
+	public static SessionModel getUserInfo(HttpServletRequest request) throws Exception {
+		if(request == null) {
+			throw new Exception("SignIn is Failed.");
 		}
-		return result;
-	}
-	
-	private static Object getAttributePrivate(HttpSession session, String attributeName) {
-		Object result = null;
-		if(session != null && attributeName != null) {
-			result = session.getAttribute(attributeName);
+
+		HttpSession session = request.getSession(false);
+		if(session != null) {
+			SessionModel model = (SessionModel)session.getAttribute(SessionModel.SESSION_NAME);
+			model.setUserIp(request.getHeader("NS-CLIENT-IP"));
+			return model;
+		} else {
+			return null;
 		}
-		
-		return result;
 	}
-	
-	public static void setAttribute(HttpSession session, String attributeName, Object value) {
-		setAttributePrivate(session, attributeName, value);
+
+	public static boolean isSignIn(HttpServletRequest request) {
+		try {
+			if(getUserInfo(request) == null || getUserInfo(request).getUserIp().length() < 1) {
+				return false;
+			}
+		} catch(Exception e) {
+			return false;
+		}
+		return true;
 	}
-	
-	public static void setAttributePrivate(HttpSession session, String attributeName, Object value) {
-		if(session != null && attributeName != null) {
-			session.setAttribute(attributeName, value);
+
+	public static void invalidate(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if(session != null) {
+			try {
+				LOGGER.debug("Session cleared" + session.getAttribute(SessionModel.SESSION_NAME));
+
+			} catch(Exception e) {
+				LOGGER.debug("Session not clear in SessionManager:" + e);
+			}
+			session.invalidate();
+			session = null;
 		}
 	}
 }

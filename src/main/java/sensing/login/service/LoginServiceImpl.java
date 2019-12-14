@@ -15,4 +15,9 @@ public class LoginServiceImpl implements LoginService{
 	public void insertUser(LoginModel loginModel) {
 		userDao.insertUser(loginModel);
 	}
+
+    @Override
+    public LoginModel getloginModel(String email) {
+        return userDao.selectUser(email);
+    }
 }

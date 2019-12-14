@@ -30,7 +30,7 @@ public class LoginController {
 	private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
 	
 	@Autowired
-	LoginService loginServie;
+	LoginService loginService;
 	
 	@RequestMapping("/login")
 	public String init() {
@@ -53,22 +53,28 @@ public class LoginController {
 	@ResponseBody
 	@RequestMapping(value="/encrypt", method= RequestMethod.GET)
 	public Map<String, String> encrypt(HttpSession session, ModelMap modelMap) {
-		LOGGER.info("Called Encrypt.");		
 		Map<String, String> publicKeyInfo = new HashMap<String, String>();
-		PublicKey publicKey = (PublicKey) SessionManager.getAttribute(session, RsaCrypto.RSA_PUBLIC_KEY);
-		PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(session, RsaCrypto.RSA_PRIVATE_KEY);
-		
-		if(publicKey == null || privateKey == null) {
-			Map<String, Key> asymmetricKey = WebSecurityUtil.generateAsymmetricKey();
-			publicKey = (PublicKey) asymmetricKey.get(RsaCrypto.RSA_PUBLIC_KEY);
-			privateKey = (PrivateKey) asymmetricKey.get(RsaCrypto.RSA_PRIVATE_KEY);
-			SessionManager.setAttribute(session, RsaCrypto.RSA_PUBLIC_KEY, publicKey);
-			SessionManager.setAttribute(session, RsaCrypto.RSA_PRIVATE_KEY, privateKey);
+		try {
+			LOGGER.info("Called Encrypt.");
+
+			PublicKey publicKey = (PublicKey) SessionManager.getAttribute(session, RsaCrypto.RSA_PUBLIC_KEY);
+			PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(session, RsaCrypto.RSA_PRIVATE_KEY);
+
+			if (publicKey == null || privateKey == null) {
+				Map<String, Key> asymmetricKey = WebSecurityUtil.generateAsymmetricKey();
+				publicKey = (PublicKey) asymmetricKey.get(RsaCrypto.RSA_PUBLIC_KEY);
+				privateKey = (PrivateKey) asymmetricKey.get(RsaCrypto.RSA_PRIVATE_KEY);
+				SessionManager.setAttribute(session, RsaCrypto.RSA_PUBLIC_KEY, publicKey);
+				SessionManager.setAttribute(session, RsaCrypto.RSA_PRIVATE_KEY, privateKey);
+			}
+
+			publicKeyInfo.put(RsaCrypto.RSA_MODULUS, RsaCrypto.extractModulus(publicKey));
+			publicKeyInfo.put(RsaCrypto.RSA_PUBLIC_EXPONENT, RsaCrypto.extractPublicExponent(publicKey));
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			return publicKeyInfo;
 		}
-		
-		publicKeyInfo.put(RsaCrypto.RSA_MODULUS,RsaCrypto.extractModulus(publicKey));
-		publicKeyInfo.put(RsaCrypto.RSA_PUBLIC_EXPONENT, RsaCrypto.extractPublicExponent(publicKey));
-		return publicKeyInfo;
 	}
 	
 	@ResponseBody
@@ -76,25 +82,25 @@ public class LoginController {
 	public ResponseModel sigin(@RequestBody LoginModel loginModel, HttpServletRequest request, ModelMap modelMap) {
 		LOGGER.info("Called Sigin.");
 		ResponseModel responseModel = new ResponseModel();
-		
-		String encryptedPassword = loginModel.getPassword();
-		
-		PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(request, RsaCrypto.RSA_PRIVATE_KEY);
-		String password = null;
-		try {
-			password = WebSecurityUtil.decrypt(privateKey, encryptedPassword);
-		} catch (Exception e) {
-			LOGGER.error("Failed to decrypt encrypted password", e);
-			password = null;
-		}
-		
-		if(password != null) {
-			responseModel.setSuccess("Y");
-			loginModel.setPassword(password);
+
+		String decryptedPassword = decrytPassword(request, loginModel);
+
+		LoginModel selectLoginModel = loginService.getloginModel(loginModel.getEmail());
+
+		if(null != selectLoginModel) {
+			if(decryptedPassword.equals(selectLoginModel.getPassword())) {
+				responseModel.setSuccess("Y");
+				loginModel.setPassword(decryptedPassword);
+			} else {
+				responseModel.setSuccess("N");
+				responseModel.setTrMsg("Error Password is empty or incorrect.");
+			}
 		} else {
 			responseModel.setSuccess("N");
-			responseModel.setTrMsg("Error Password is null.");
+			responseModel.setTrMsg("Error User is not correct.");
 		}
+
+
 		
 		return responseModel;
 	}
@@ -105,21 +111,12 @@ public class LoginController {
 		LOGGER.info("Called Sigup.");
 		ResponseModel responseModel = new ResponseModel();
 
-		String encryptedPassword = loginModel.getPassword();
+		String decryptedPassword = decrytPassword(request,loginModel);
 
-		PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(request, RsaCrypto.RSA_PRIVATE_KEY);
-		String password = null;
-		try {
-			password = WebSecurityUtil.decrypt(privateKey, encryptedPassword);
-		} catch (Exception e) {
-			LOGGER.error("Failed to decrypt encrypted password", e);
-			password = null;
-		}
-
-		if(password != null) {
+		if(decryptedPassword != null) {
 			responseModel.setSuccess("Y");
-			loginModel.setPassword(password);
-			loginServie.insertUser(loginModel);
+			loginModel.setPassword(decryptedPassword);
+			loginService.insertUser(loginModel);
 		} else {
 			responseModel.setSuccess("N");
 			responseModel.setTrMsg("Error Password is null.");
@@ -132,5 +129,20 @@ public class LoginController {
 	public String body() {
 		LOGGER.info("Called Body.");
 		return "/login/body";
+	}
+
+	private String decrytPassword(HttpServletRequest request, LoginModel loginModel){
+		String encryptedPassword = loginModel.getPassword();
+
+		PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(request, RsaCrypto.RSA_PRIVATE_KEY);
+		String decryptedPassword = null;
+		try {
+			decryptedPassword = WebSecurityUtil.decrypt(privateKey, encryptedPassword);
+		} catch (Exception e) {
+			LOGGER.error("Failed to decrypt encrypted password", e);
+			decryptedPassword = null;
+		}
+
+		return decryptedPassword;
 	}
 }

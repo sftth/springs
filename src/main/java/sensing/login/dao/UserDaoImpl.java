@@ -15,4 +15,9 @@ public class UserDaoImpl implements UserDao{
 	public void insertUser(LoginModel loginModel) {
 		sqlSession.insert("login.insertUser", loginModel);
 	}
+
+    @Override
+    public LoginModel selectUser(String email) {
+        return sqlSession.selectOne ("login.selectUser", email);
+    }
 }
