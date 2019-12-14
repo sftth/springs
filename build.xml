@@ -14,6 +14,7 @@
 			<tarfileset dir="${target.dir}">
 				<include name="**/*.js" />
 				<include name="**/*.css"/>
+				<include name="**/*.svg"/>
 				<exclude name="WEB-INF/**" />
 			</tarfileset>	
 		</tar>
