@@ -37,7 +37,19 @@ public class LoginController {
 		LOGGER.info("Called init.");
 		return "/login/login";
 	}
-	
+
+	@RequestMapping(value="/signin", method= RequestMethod.GET)
+	public String signinView() {
+		LOGGER.info("Called signin view");
+		return "/login/signin";
+	}
+
+	@RequestMapping(value="/signup", method= RequestMethod.GET)
+	public String signupView() {
+		LOGGER.info("Called signup view");
+		return "/login/signup";
+	}
+
 	@ResponseBody
 	@RequestMapping(value="/encrypt", method= RequestMethod.GET)
 	public Map<String, String> encrypt(HttpSession session, ModelMap modelMap) {
@@ -56,11 +68,11 @@ public class LoginController {
 		
 		publicKeyInfo.put(RsaCrypto.RSA_MODULUS,RsaCrypto.extractModulus(publicKey));
 		publicKeyInfo.put(RsaCrypto.RSA_PUBLIC_EXPONENT, RsaCrypto.extractPublicExponent(publicKey));
-		return publicKeyInfo; 
+		return publicKeyInfo;
 	}
 	
 	@ResponseBody
-	@RequestMapping(value="/signin", method=RequestMethod.POST)
+	@RequestMapping(value="/signInProcess", method=RequestMethod.POST)
 	public ResponseModel sigin(@RequestBody LoginModel loginModel, HttpServletRequest request, ModelMap modelMap) {
 		LOGGER.info("Called Sigin.");
 		ResponseModel responseModel = new ResponseModel();
@@ -79,12 +91,40 @@ public class LoginController {
 		if(password != null) {
 			responseModel.setSuccess("Y");
 			loginModel.setPassword(password);
-			// loginServie.insertUser(loginModel);
 		} else {
 			responseModel.setSuccess("N");
 			responseModel.setTrMsg("Error Password is null.");
 		}
 		
+		return responseModel;
+	}
+
+	@ResponseBody
+	@RequestMapping(value="/signUpProcess", method=RequestMethod.POST)
+	public ResponseModel sigup(@RequestBody LoginModel loginModel, HttpServletRequest request, ModelMap modelMap) {
+		LOGGER.info("Called Sigup.");
+		ResponseModel responseModel = new ResponseModel();
+
+		String encryptedPassword = loginModel.getPassword();
+
+		PrivateKey privateKey = (PrivateKey) SessionManager.getAttribute(request, RsaCrypto.RSA_PRIVATE_KEY);
+		String password = null;
+		try {
+			password = WebSecurityUtil.decrypt(privateKey, encryptedPassword);
+		} catch (Exception e) {
+			LOGGER.error("Failed to decrypt encrypted password", e);
+			password = null;
+		}
+
+		if(password != null) {
+			responseModel.setSuccess("Y");
+			loginModel.setPassword(password);
+			loginServie.insertUser(loginModel);
+		} else {
+			responseModel.setSuccess("N");
+			responseModel.setTrMsg("Error Password is null.");
+		}
+
 		return responseModel;
 	}
 	

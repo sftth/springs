@@ -20,12 +20,6 @@ import sensing.model.UserModel;
 
 @Controller
 public class MainController {
-	
-	@RequestMapping("/main")
-	public String main() {
-		return "main";
-	}
-	
 	@RequestMapping("/param/{id}")
 	public ModelAndView main(@PathVariable("id")int id) {
 		System.out.println("tesr");
