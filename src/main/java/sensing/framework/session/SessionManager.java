@@ -55,7 +55,7 @@ public class SessionManager {
 		LOGGER.debug("setNewSessionData is Started");
 		HttpSession session = request.getSession(false);
 		session = getNewSession(request);
-		session.setAttribute(model.getUserId(), model);
+		session.setAttribute(model.getUserIp(), model);
 		LOGGER.debug("setNewSessionData is Finished.");
 	}
 
@@ -67,14 +67,14 @@ public class SessionManager {
 		return request.getSession(true);
 	}
 
-	public static SessionModel getUserInfo(HttpServletRequest request, String userId) throws Exception {
+	public static SessionModel getUserInfo(HttpServletRequest request, String userIp) throws Exception {
 		if(request == null) {
 			throw new Exception("SignIn is Failed.");
 		}
 
 		HttpSession session = request.getSession(false);
 		if(session != null) {
-			SessionModel model = (SessionModel)session.getAttribute(userId);
+			SessionModel model = (SessionModel)session.getAttribute(userIp);
 			return model;
 		} else {
 			return null;

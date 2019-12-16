@@ -93,13 +93,19 @@ public class LoginController {
 				if(decryptedPassword.equals(selectLoginModel.getPassword())) {
 					responseModel.setSuccess("Y");
 					loginModel.setPassword(decryptedPassword);
+					loginModel.setName(selectLoginModel.getName());
 
 					if(null == SessionManager.getUserInfo(request, loginModel.getEmail())) {
 						SessionModel sessionModel = new SessionModel();
 						sessionModel.setUserId(loginModel.getEmail());
 						sessionModel.setName(loginModel.getName());
+						sessionModel.setUserIp(request.getHeader("NS-CLIENT-IP"));
 
 						SessionManager.setNewSessionData(request, sessionModel);
+						//For Log
+						SessionModel modelForLogging= SessionManager.getUserInfo(request, loginModel.getEmail());
+						LOGGER.info("=====User ID: " + modelForLogging.getUserId());
+						LOGGER.info("=====Name: " + modelForLogging.getName());
 					}
 				} else {
 					responseModel.setSuccess("N");
@@ -139,9 +145,22 @@ public class LoginController {
 	}
 	
 	@RequestMapping(value="/body", method= RequestMethod.GET)
-	public String body() {
-		LOGGER.info("Called Body.");
-		return "/login/body";
+	public String body(HttpServletRequest request) {
+		String returnUrl = "";
+		try {
+			String userIp = (String) request.getHeader("NS-CLIENT-IP");
+			SessionModel sessionModel = SessionManager.getUserInfo(request, userIp);
+			LOGGER.info("Called Body.");
+
+			if(null == sessionModel) {
+				returnUrl = "/login/body";
+			} else {
+				returnUrl = "/web/signin";
+			}
+		} catch(Exception e){
+			e.printStackTrace();
+		}
+		return returnUrl;
 	}
 
 	private String decrytPassword(HttpServletRequest request, LoginModel loginModel){
