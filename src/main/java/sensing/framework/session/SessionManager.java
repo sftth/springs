@@ -55,7 +55,7 @@ public class SessionManager {
 		LOGGER.debug("setNewSessionData is Started");
 		HttpSession session = request.getSession(false);
 		session = getNewSession(request);
-		session.setAttribute(SessionModel.SESSION_NAME, model);
+		session.setAttribute(model.getUserId(), model);
 		LOGGER.debug("setNewSessionData is Finished.");
 	}
 
@@ -67,24 +67,23 @@ public class SessionManager {
 		return request.getSession(true);
 	}
 
-	public static SessionModel getUserInfo(HttpServletRequest request) throws Exception {
+	public static SessionModel getUserInfo(HttpServletRequest request, String userId) throws Exception {
 		if(request == null) {
 			throw new Exception("SignIn is Failed.");
 		}
 
 		HttpSession session = request.getSession(false);
 		if(session != null) {
-			SessionModel model = (SessionModel)session.getAttribute(SessionModel.SESSION_NAME);
-			model.setUserIp(request.getHeader("NS-CLIENT-IP"));
+			SessionModel model = (SessionModel)session.getAttribute(userId);
 			return model;
 		} else {
 			return null;
 		}
 	}
 
-	public static boolean isSignIn(HttpServletRequest request) {
+	public static boolean isSignIn(HttpServletRequest request, String userId) {
 		try {
-			if(getUserInfo(request) == null || getUserInfo(request).getUserIp().length() < 1) {
+			if(getUserInfo(request, userId) == null ) {
 				return false;
 			}
 		} catch(Exception e) {

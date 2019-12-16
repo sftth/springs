@@ -22,6 +22,7 @@ import sensing.cmmn.model.LoginModel;
 import sensing.cmmn.model.ResponseModel;
 import sensing.framework.crypto.RsaCrypto;
 import sensing.framework.session.SessionManager;
+import sensing.framework.session.SessionModel;
 import sensing.login.service.LoginService;
 import sensing.util.WebSecurityUtil;
 
@@ -80,29 +81,41 @@ public class LoginController {
 	@ResponseBody
 	@RequestMapping(value="/signInProcess", method=RequestMethod.POST)
 	public ResponseModel sigin(@RequestBody LoginModel loginModel, HttpServletRequest request, ModelMap modelMap) {
+
 		LOGGER.info("Called Sigin.");
 		ResponseModel responseModel = new ResponseModel();
+		try{
+			String decryptedPassword = decrytPassword(request, loginModel);
 
-		String decryptedPassword = decrytPassword(request, loginModel);
+			LoginModel selectLoginModel = loginService.getloginModel(loginModel.getEmail());
 
-		LoginModel selectLoginModel = loginService.getloginModel(loginModel.getEmail());
+			if(null != selectLoginModel) {
+				if(decryptedPassword.equals(selectLoginModel.getPassword())) {
+					responseModel.setSuccess("Y");
+					loginModel.setPassword(decryptedPassword);
 
-		if(null != selectLoginModel) {
-			if(decryptedPassword.equals(selectLoginModel.getPassword())) {
-				responseModel.setSuccess("Y");
-				loginModel.setPassword(decryptedPassword);
+					if(null == SessionManager.getUserInfo(request, loginModel.getEmail())) {
+						SessionModel sessionModel = new SessionModel();
+						sessionModel.setUserId(loginModel.getEmail());
+						sessionModel.setName(loginModel.getName());
+
+						SessionManager.setNewSessionData(request, sessionModel);
+					}
+				} else {
+					responseModel.setSuccess("N");
+					responseModel.setTrMsg("Error Password is empty or incorrect.");
+				}
 			} else {
 				responseModel.setSuccess("N");
-				responseModel.setTrMsg("Error Password is empty or incorrect.");
+				responseModel.setTrMsg("Error User is not correct.");
 			}
-		} else {
-			responseModel.setSuccess("N");
-			responseModel.setTrMsg("Error User is not correct.");
+
+		} catch(Exception e) {
+			e.printStackTrace();
+		} finally {
+			return responseModel;
 		}
 
-
-		
-		return responseModel;
 	}
 
 	@ResponseBody
