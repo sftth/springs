@@ -155,7 +155,7 @@ public class LoginController {
 			if(null != sessionModel) {
 				returnUrl = "/login/body";
 			} else {
-				returnUrl = "/web/signin";
+				returnUrl = "/login/signin";
 			}
 		} catch(Exception e){
 			e.printStackTrace();
