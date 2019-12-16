@@ -99,11 +99,11 @@ public class LoginController {
 						SessionModel sessionModel = new SessionModel();
 						sessionModel.setUserId(loginModel.getEmail());
 						sessionModel.setName(loginModel.getName());
-						sessionModel.setUserIp(request.getHeader("NS-CLIENT-IP"));
+						sessionModel.setUserIp(getIp(request));
 
 						SessionManager.setNewSessionData(request, sessionModel);
 						//For Log
-						SessionModel modelForLogging= SessionManager.getUserInfo(request, loginModel.getEmail());
+						SessionModel modelForLogging= SessionManager.getUserInfo(request, sessionModel.getUserIp());
 						LOGGER.info("=====User ID: " + modelForLogging.getUserId());
 						LOGGER.info("=====Name: " + modelForLogging.getName());
 					}
@@ -148,11 +148,11 @@ public class LoginController {
 	public String body(HttpServletRequest request) {
 		String returnUrl = "";
 		try {
-			String userIp = (String) request.getHeader("NS-CLIENT-IP");
+			String userIp = (String) getIp(request);
 			SessionModel sessionModel = SessionManager.getUserInfo(request, userIp);
 			LOGGER.info("Called Body.");
 
-			if(null == sessionModel) {
+			if(null != sessionModel) {
 				returnUrl = "/login/body";
 			} else {
 				returnUrl = "/web/signin";
@@ -176,5 +176,37 @@ public class LoginController {
 		}
 
 		return decryptedPassword;
+	}
+
+	private String getIp(HttpServletRequest request) {
+
+		String ip = request.getHeader("X-Forwarded-For");
+
+		LOGGER.info(">>>> X-FORWARDED-FOR : " + ip);
+
+		if (ip == null) {
+			ip = request.getHeader("Proxy-Client-IP");
+			LOGGER.info(">>>> Proxy-Client-IP : " + ip);
+		}
+		if (ip == null) {
+			ip = request.getHeader("WL-Proxy-Client-IP"); // 웹로직
+			LOGGER.info(">>>> WL-Proxy-Client-IP : " + ip);
+		}
+		if (ip == null) {
+			ip = request.getHeader("HTTP_CLIENT_IP");
+			LOGGER.info(">>>> HTTP_CLIENT_IP : " + ip);
+		}
+		if (ip == null) {
+			ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+			LOGGER.info(">>>> HTTP_X_FORWARDED_FOR : " + ip);
+		}
+		if (ip == null) {
+			ip = request.getRemoteAddr();
+		}
+
+		LOGGER.info(">>>> Result : IP Address : "+ip);
+
+		return ip;
+
 	}
 }
