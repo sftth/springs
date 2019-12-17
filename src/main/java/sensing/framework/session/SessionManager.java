@@ -61,7 +61,7 @@ public class SessionManager {
 
 	private static HttpSession getNewSession(HttpServletRequest request) throws Exception {
 		LOGGER.debug("getNewSession is Started.");
-		int session_timeout = 60 * 60 ;
+		int session_timeout = 60 * 5 ;
 		request.getSession(true).setMaxInactiveInterval(session_timeout);
 
 		return request.getSession(true);
