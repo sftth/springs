@@ -15,6 +15,7 @@ public class SessionModel implements Serializable {
     private String name;
     private UUID uid ;
     private String userIp;
+    private String sid;
 
     @Override
     public String toString() {

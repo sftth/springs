@@ -95,7 +95,7 @@ public class LoginController {
 					loginModel.setPassword(decryptedPassword);
 					loginModel.setName(selectLoginModel.getName());
 
-					if(null == SessionManager.getUserInfo(request, loginModel.getEmail())) {
+					if(null == SessionManager.getUserInfo(request)) {
 						SessionModel sessionModel = new SessionModel();
 						sessionModel.setUserId(loginModel.getEmail());
 						sessionModel.setName(loginModel.getName());
@@ -103,9 +103,9 @@ public class LoginController {
 
 						SessionManager.setNewSessionData(request, sessionModel);
 						//For Log
-						SessionModel modelForLogging= SessionManager.getUserInfo(request, sessionModel.getUserIp());
-						LOGGER.info("=====User ID: " + modelForLogging.getUserId());
-						LOGGER.info("=====Name: " + modelForLogging.getName());
+						SessionModel modelForLogging= SessionManager.getUserInfo(request);
+						LOGGER.info("=====session 설정 결과 User ID: " + modelForLogging.getUserId());
+						LOGGER.info("=====session 설정 결과 Name: " + modelForLogging.getName());
 					}
 				} else {
 					responseModel.setSuccess("N");
@@ -145,11 +145,13 @@ public class LoginController {
 	}
 	
 	@RequestMapping(value="/body", method= RequestMethod.GET)
-	public String body(HttpServletRequest request) {
+	public String body(HttpServletRequest request, ModelMap model) {
 		String returnUrl = "";
 		try {
 			String userIp = (String) getIp(request);
-			SessionModel sessionModel = SessionManager.getUserInfo(request, userIp);
+			SessionModel sessionModel = SessionManager.getUserInfo(request);
+
+			model.addAttribute("userName", sessionModel.getName());
 			LOGGER.info("Called Body.");
 
 			if(null != sessionModel) {
@@ -160,6 +162,7 @@ public class LoginController {
 		} catch(Exception e){
 			e.printStackTrace();
 		}
+
 		return returnUrl;
 	}
 

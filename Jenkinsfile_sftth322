@@ -28,6 +28,7 @@ pipeline {
 		}
 		stage('Deploy'){
 			parallel{
+				/*
 				stage('Deploy WAS') {
 					steps {
 						echo '===========================4.1 Deploy Dev WAS================='
@@ -36,6 +37,7 @@ pipeline {
                         sh "scp -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/was/mainWebApp.war ec2-user@${params.tomcat_dev2}:/sorc001/appadm/application"
                     }
 				}
+				*/
 				stage('Deploy WEB'){
 					steps{
 						echo '====================5.1 Deploy Dev WEB========================='
@@ -54,14 +56,15 @@ pipeline {
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} /engn001/apache/2.4/servers/webd-ist_80/restart.sh"
 				    }
 				}
+				/*
 				stage('Restart WAS'){
 				    steps{
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/tomcat/9.0/servers/ist_8180/restart.sh"
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} /engn001/tomcat/9.0/servers/ist_8180/restart.sh"
 				    }
 				}
-			}		
-		
+				*/
+			}
 		}
 	}
 }

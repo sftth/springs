@@ -51,30 +51,30 @@ public class SessionManager {
         }
     }
 
-	public static void setNewSessionData(HttpServletRequest request, SessionModel model) throws Exception {
+	public static void setNewSessionData(HttpServletRequest request, SessionModel sessionModel) throws Exception {
 		LOGGER.debug("setNewSessionData is Started");
-		HttpSession session = request.getSession(false);
-		session = getNewSession(request);
-		session.setAttribute(model.getUserIp(), model);
+		HttpSession session = request.getSession(true);
+//		session = getNewSession(request);
+		session.setAttribute(request.getSession().getId(), sessionModel);
 		LOGGER.debug("setNewSessionData is Finished.");
 	}
 
-	private static HttpSession getNewSession(HttpServletRequest request) throws Exception {
-		LOGGER.debug("getNewSession is Started.");
-		int session_timeout = 60 * 5 ;
-		request.getSession(true).setMaxInactiveInterval(session_timeout);
+//	private static HttpSession getNewSession(HttpServletRequest request) throws Exception {
+//		LOGGER.debug("getNewSession is Started.");
+//		int session_timeout = 60 * 5 ;
+//		request.getSession(true).setMaxInactiveInterval(session_timeout);
+//
+//		return request.getSession(true);
+//	}
 
-		return request.getSession(true);
-	}
-
-	public static SessionModel getUserInfo(HttpServletRequest request, String userIp) throws Exception {
+	public static SessionModel getUserInfo(HttpServletRequest request) throws Exception {
 		if(request == null) {
 			throw new Exception("SignIn is Failed.");
 		}
 
 		HttpSession session = request.getSession(false);
 		if(session != null) {
-			SessionModel model = (SessionModel)session.getAttribute(userIp);
+			SessionModel model = (SessionModel)session.getAttribute(request.getSession().getId());
 			return model;
 		} else {
 			return null;
@@ -83,7 +83,7 @@ public class SessionManager {
 
 	public static boolean isSignIn(HttpServletRequest request, String userId) {
 		try {
-			if(getUserInfo(request, userId) == null ) {
+			if(getUserInfo(request) == null ) {
 				return false;
 			}
 		} catch(Exception e) {
