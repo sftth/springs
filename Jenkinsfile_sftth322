@@ -44,16 +44,18 @@ pipeline {
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} rm -rf /sorc001/appadm/application/htdocs/*"
 						sh "scp  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev}:/sorc001/appadm/application/htdocs"
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
+						/*
 						echo '====================5.2 Deploy Dev2 WEB========================='
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} rm -rf /sorc001/appadm/application/htdocs/*"
 						sh "scp  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ./build/web/mainWebApp.tar ec2-user@${params.apache_dev2}:/sorc001/appadm/application/htdocs"
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} tar -xvf /sorc001/appadm/application/htdocs/mainWebApp.tar -C /sorc001/appadm/application/htdocs"
+					    */
 					}
 				}
 				stage('Restart WEB'){
 				    steps{
 						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev} /engn001/apache/2.4/servers/webd-ist_80/restart.sh"
-						sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} /engn001/apache/2.4/servers/webd-ist_80/restart.sh"
+					/*	sh "ssh  -i /home/ec2-user/sftth322-keypair.pem -o StrictHostKeyChecking=no ec2-user@${params.apache_dev2} /engn001/apache/2.4/servers/webd-ist_80/restart.sh" */
 				    }
 				}
 				/*
