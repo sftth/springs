@@ -151,10 +151,10 @@ public class LoginController {
 			String userIp = (String) getIp(request);
 			SessionModel sessionModel = SessionManager.getUserInfo(request);
 
-			model.addAttribute("userName", sessionModel.getName());
-			LOGGER.info("Called Body.");
 
 			if(null != sessionModel) {
+				model.addAttribute("userName", sessionModel.getName());
+				LOGGER.info("Called Body.");
 				returnUrl = "/login/body";
 			} else {
 				returnUrl = "/login/signin";
