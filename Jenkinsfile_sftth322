@@ -2,10 +2,10 @@ pipeline {
 	agent any
 	
 	parameters {
-		string(name: 'apache_dev' , defaultValue: '172.31.10.39' , description: 'Dev WEB Server')
-		string(name: 'tomcat_dev' , defaultValue: '172.31.10.39' , description: 'Dev WAS Server')
+		string(name: 'apache_dev' , defaultValue: '172.31.42.243' , description: 'Dev WEB Server')
+/*		string(name: 'tomcat_dev' , defaultValue: '172.31.10.39' , description: 'Dev WAS Server')
 		string(name: 'apache_dev2' , defaultValue: '172.31.6.220' , description: 'Dev2 WEB Server')
-        string(name: 'tomcat_dev2' , defaultValue: '172.31.6.220' , description: 'Dev2 WAS Server')
+        string(name: 'tomcat_dev2' , defaultValue: '172.31.6.220' , description: 'Dev2 WAS Server') */
 	}
 	
 	triggers {
